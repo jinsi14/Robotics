@@ -1,0 +1,26 @@
+C:\\Users\\pk\\Desktop\\OM\\from-andrew-dataload\\PF RBA Blue Prism Output Test Data 20220131.xlsx
+
+C:\\Users\\pk\\Desktop\\OM\\from-Athenkosi\\Testing.xlsx
+C:\\Users\\pk\\Desktop\\OM\\from-Athenkosi\\Testing-modified.xlsx
+
+C:\\Users\\pk\\Desktop\\OM\\from-andrew-dataload\\OMCD_BI_CF_IND_Wizard_Scenarios 220202.xlsx
+
+/mnt/03ce7afd-d83e-4e36-b29e-b96f2ba2e2fc/projects/old-mutual/compliance-project/gdm/BI_CF_IND_Wizard_Scenarios_5d_-d_202203090403.csv
+
+group-compliance-non-prod-sql-rds.cqesntgovz0q.eu-west-1.rds.amazonaws.com
+
+D:\\git\\Group_Compliance\\ExcelDBLoader\\ExcelDBLoader\\src\\main\\resources\\sample-datasheets\\prod-check\\BI_CF_IND_Wizard_Scenarios_5d_-d_202303312207.csv
+
+
+--01-04-2023
+BI_CF_IND_Wizard_Scenarios_5d_-d_202303312207.csv
+BI_CF_IND_Wizard_Scenarios_5d_e-l_202303312203.csv
+BI_CF_IND_Wizard_Scenarios_5d_m-m_202303310316.csv
+BI_CF_IND_Wizard_Scenarios_5d_n-r_202303312154.csv
+BI_CF_IND_Wizard_Scenarios_5d_s+_202303312158.csv
+
+
+
+
+
+

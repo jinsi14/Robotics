@@ -1,0 +1,39 @@
+Execution parameters:
+{
+  "Description": "Send email for lambda execute success or fail ",
+  "VpcId": "vpc-0ea1673a48b053e41",
+  "Name": "OML-Group-Complience-Dataload",
+  "StackTemplateId": "stm-eakrsalqo9m62tpun",
+  "TimeoutInMinutes": 60,
+  "Parameters": {
+    "TopicName": "OML-Group-Complience-Dataload",
+    "DisplayName": "",
+    "Subscription1Protocol": "email",
+    "Subscription1Endpoint": "PKhunt@oldmutual.com",
+    "Subscription1RawMessageDelivery": "true",
+    "Subscription2Endpoint": "",
+    "Subscription2RawMessageDelivery": "false",
+    "Subscription3Endpoint": "",
+    "Subscription3RawMessageDelivery": "false",
+    "Subscription4Endpoint": "",
+    "Subscription4RawMessageDelivery": "false",
+    "Subscription5Endpoint": "",
+    "Subscription5RawMessageDelivery": "false",
+    "KmsMasterKeyId": ""
+  }
+}
+
+Execution output:
+{
+  "stack_id": "stack-84c6c480e70f0d681",
+  "status": {
+    "name": "CreateCompleted",
+    "id": "CreateCompleted"
+  },
+  "outputs": [
+    {
+      "key": "SNSTopicARN",
+      "value": "arn:aws:sns:eu-west-1:265757109115:OML-Group-Complience-Dataload"
+    }
+  ]
+}

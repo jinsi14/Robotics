@@ -1,0 +1,12 @@
+/*
+Schedule : cron(15 00 * * ? *)
+*/
+/*AI-CS-GroupCompliance-lambda-trigger-daily-mid-night-load-rule*/
+/*
+
+*/
+{
+  "ArnLike": {
+    "AWS:SourceArn": "arn:aws:events:ap-south-1:713528111139:rule/Lambda-SFTP-S3-MidNight-15"
+  }
+}

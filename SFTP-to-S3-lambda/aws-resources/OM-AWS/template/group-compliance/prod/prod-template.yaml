@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: "AWS Lambda ETL function, pulls data from SFTP to S3 to RDS."
+
+Globals:
+  Function:
+    Tags:
+      oml-cost-center: 10065369
+      oml-application-name: Group Compliance DCC
+      oml-application-id: Group Compliance DCC
+      oml-department: Group Compliance
+      oml-environment: Non Prod
+      oml-project-name: Group Compliance DCC
+      oml-resource-owner-team: Group Compliance
+      oml-resource-owner-team-email: leezaamlatoldmutual.com
+      oml-resource-owner-contact: leezaamlatoldmutual.com
+      oml-business-owner: Leezaam Leitch
+
+Resources:
+  SFTPToS3RDSLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures:
+        - x86_64
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      CodeUri: /home/pp/git/Group_Compliance/SFTP-to-S3-lambda
+      Environment:
+        Variables:
+          AWS_SM_SECRET_NAME: oml-group-compliance-secrets
+          AWS_STS_SERVICE_END_POINT:
+          ROLE_ARN:
+          ROLE_SESSION_NAME: GroupComplianceSFTPRDSIngestion
+          STAGE: DEV
+
+      FunctionName: SFTPToS3RDSLambdaFunction
+      Handler: com.om.gc.S3FilePutTriggerLambda::handleRequest
+      MemorySize: 512
+      Role:
+      Runtime: java8
+      Timeout: 900
+

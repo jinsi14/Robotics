@@ -1,0 +1,81 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetResourcePolicy",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:ListSecretVersionIds"
+      ],
+      "Resource": "arn:aws:secretsmanager:eu-west-1:332760374405:secret:oml-cs-ai-non-prod-compliance-secrets-xQTaA9"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "secretsmanager:ListSecrets",
+      "Resource": "*"
+    },
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream"
+      ],
+      "Resource": "arn:aws:logs:*:332760374405:log-group:*",
+      "Effect": "Allow",
+      "Sid": "AllowCreateLogGroup"
+    },
+    {
+      "Action": [
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:332760374405:log-group:*:log-stream:*",
+      "Effect": "Allow",
+      "Sid": "AllowPutLogs"
+    },
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:*"
+          ],
+          "Resource": [
+            "arn:aws:s3:::oml-cs-ai-non-prod-compliance-p/*"
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+/*----------------------
+AllRegionS3BucketResourceHandlerPolicy
+----------------------*/
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricData"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:PutBucketLogging",
+        "s3:PutBucketAcl",
+        "s3:PutBucketPolicy",
+        "s3:PutBucketVersioning",
+        "s3:PutEncryptionConfiguration",
+        "s3:ListBucket",
+        "s3:GetBucketPolicy"
+      ],
+      "Resource": "arn:aws:s3:::oml-cs-ai-non-prod-compliance/*"
+    }
+  ]
+}

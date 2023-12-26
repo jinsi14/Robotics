@@ -1,0 +1,17 @@
+1) Secret Manager Key:
+ oml-group-compliance-secrets
+
+ARN: arn:aws:secretsmanager:eu-west-1:342478014409:secret:oml-group-compliance-secrets-TgsL76
+
+2) RDS instance: group-compliance-non-prod-sql-rds
+ARN:
+End Point: group-compliance-non-prod-sql-rds.cqesntgovz0q.eu-west-1.rds.amazonaws.com
+
+
+3) S3: Bucket Name: policy-management-non-prod
+ARN: arn:aws:s3:::policy-management-non-prod
+
+
+RFC:
+
+customer_om_groupcompliance-nonprod-ec2-instance-profile-role

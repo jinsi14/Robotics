@@ -1,0 +1,19 @@
+{
+  "DocumentName": "AWSManagedServices-HandleCreateIAMRole-Admin",
+  "Region": "us-east-1",
+  "Parameters": {
+    "ServicePrincipal": "ec2.amazonaws.com",
+    "RoleName": "customer_om_groupcompliance-nonprod-ec2-instance-profile-role",
+    "RolePath": "/",
+    "Preview": "Yes",
+    "S3ReadAccess": [
+      "arn:aws:s3:::policy-management-non-prod"
+    ],
+    "S3WriteAccess": [
+      "arn:aws:s3:::policy-management-non-prod"
+    ],
+    "SecretsManagerReadAccess": [
+      "arn:aws:secretsmanager:eu-west-1:342478014409:secret:oml-group-compliance-secrets-TgsL76"
+    ]
+  }
+}

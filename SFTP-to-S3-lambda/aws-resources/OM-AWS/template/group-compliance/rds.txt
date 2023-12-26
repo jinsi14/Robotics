@@ -1,0 +1,98 @@
+Confirmations:
+RDS: HoursOfOperation : existing: "HoursOfOperation": "07:00-19:00",
+
+AppId: ?
+----------------------------------------
+Stopping RDS RFC: ct-2r2bffv9u6q4m
+
+
+
+----------------------------------------
+https://oml.service-now.com/teams?sys_kb_id=d65e4fea1bc2c510d895ffb5464bcbb5&id=kb_article_view&sysparm_rank=6&sysparm_tsqueryId=e2061b621bc6c510d895ffb5464bcb06
+https://oml.service-now.com/teams?id=kb_article_view&sysparm_article=KB0010315&sys_kb_id=e89b4382db53f0501fe9127b4b961992&spa=1
+https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_SQLServerWinAuth.html
+
+Example
+    RDSDBInstanceIdentifier,
+    RDSDomainIAMRoleName,
+    SecurityGroups,
+    VpcId,
+    Secrets Manager,
+    OptionGroup,
+    OptionName,
+    S3IntegrationRole,
+    RDSS3Role,
+    Tags etc.
+
+Create IAM roles
+1.customer_om_nonprod_domain_join_role
+2.domain_join_service_role
+3.s3_integration_service_role
+4.enhanced_monitoring_service_role
+S3RoleBulkUpload
+
+- Create S3 Bucket for CFN
+    Non PROD: oml-groupcompliance-cfn-non-prod
+    PROD : oml-groupcompliance-cfn-prod
+
+s3: https://docs.aws.amazon.com/managedservices/latest/ctexguide/ex-s3-create-col.html
+
+------------------------------
+REF: https://oml.service-now.com/kb_view.do?sys_kb_id=34773b11db3a6090d5f6e7640596191a&sysparm_rank=6&sysparm_tsqueryId=3beff3a7871ec190a8eb43b90cbb3570
+1. Create DB Security Group :: ct-3pc215bnwb6p7
+    Description: Create Security Group for Group Compliance RDS access.
+
+    NonPROD: RFC Created - CHG0795817 - groupcompliance-nonprod-rds-sg
+    PROD: RFC Created - CHG0796018 - groupcompliance-prod-rds-sg
+
+    oml-cost-center: 10065369
+    oml-application-name: Group Compliance DCC
+    oml-application-id: Group Compliance DCC
+    oml-department: Group Compliance
+    oml-environment: Non Prod
+    oml-project-name: Group Compliance DCC
+    oml-resource-owner-team: Group Compliance
+    oml-resource-owner-team-email: leezaamlatoldmutual.com
+    oml-resource-owner-contact: leezaamlatoldmutual.com
+    oml-business-owner: Leezaam Leitch
+
+REF: https://oml.service-now.com/kb_view.do?sys_kb_id=f0361f221bc6c510d895ffb5464bcbc6&sysparm_rank=9&sysparm_tsqueryId=9e923d1587a2c914a8eb43b90cbb3530
+Step - 2 Create a manual request for sharing the Active Directory
+
+    NonPROD: RFC Created - CHG0818228 -- Failed
+    PROD: RFC Created - CHG0818295 -- Failed
+
+Step - 3. Create role for use with for RDS to S3 IAM Role.
+
+Step - 4 Create a Security group for RDS BI features
+
+Step - 5 Create your Amazon S3 Bucket where the RDS CFN template will be placed. - ct-1a68ck03fn98r
+    NonPROD: CHG0823676 -- Success
+    PROD: CHG0823715 -- Success
+
+Step - 6 Ingest the CFN Template & wait till the RFC is completed & Stack is created.
+Presigned URL
+    Non PROD:
+    PROD:
+
+
+------------------------------------------------------------------------------------------------------------------------
+How to Use the default RDS Service Roles
+https://oml.service-now.com/teams?sys_kb_id=d65e4fea1bc2c510d895ffb5464bcbb5&id=kb_article_view&sysparm_rank=6&sysparm_tsqueryId=e2061b621bc6c510d895ffb5464bcb06
+1. Create S3 Bucket : oml-${AWS::AccountId}-rds-migration
+    NonPROD: oml-342478014409-rds-migration - CHG0818596 -- Success
+    PROD: oml-265757109115-rds-migration - CHG0818618 -- Success
+
+------------------------------------------------------------------------------------------------------------------------
+
+Step - 2 Remaining For associating the SG with RDS.
+------------------------
+2. customer_om_nonprod_domain_join_role
+    customer_om_nonprod_domain_join_policy
+
+2.
+
+--------------------------------------------------
+
+Directory Service :
+Manual Request for AD Directory sharing.

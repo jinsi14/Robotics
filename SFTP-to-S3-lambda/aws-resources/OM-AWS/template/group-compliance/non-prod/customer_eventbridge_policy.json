@@ -1,0 +1,189 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "events:Describe*",
+        "events:List*",
+        "events:TestEventPattern",
+        "schemas:Describe*",
+        "schemas:List*",
+        "schemas:SearchSchemas"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "EventAndSchemaReadOnlyAccess"
+    },
+    {
+      "Action": [
+        "batch:List*",
+        "ecs:ListClusters",
+        "ecs:ListTaskDefinitionFamilies",
+        "firehose:ListDeliveryStreams",
+        "iam:ListRoles",
+        "kinesis:ListStreams",
+        "lambda:ListAliases",
+        "lambda:ListFunctions",
+        "lambda:ListVersionsByFunction",
+        "logs:DescribeLogGroups",
+        "sns:ListTopics",
+        "ssm:ListDocuments",
+        "states:ListStateMachines"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "ListPermissionsOnAWSServices"
+    },
+    {
+      "Condition": {
+        "StringEquals": {
+          "iam:AWSServiceName": "schemas.amazonaws.com"
+        }
+      },
+      "Action": "iam:CreateServiceLinkedRole",
+      "Resource": "arn:aws:iam::*:role/aws-service-role/schemas.amazonaws.com/AWSServiceRoleForSchemas",
+      "Effect": "Allow",
+      "Sid": "AWSServiceLinkedRoleForSchemas"
+    },
+    {
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "events.amazonaws.com"
+        }
+      },
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::*:role/customer_eventbridge_*",
+      "Effect": "Allow",
+      "Sid": "AWSIAMPassRoleOnlytoCustomerRole"
+    },
+    {
+      "Condition": {
+        "StringEquals": {
+          "lambda:Principal": [
+            "events.amazonaws.com"
+          ]
+        }
+      },
+      "Action": [
+        "lambda:AddPermission"
+      ],
+      "Effect": "Allow",
+      "Sid": "EventBridgeInvokeLambdaFunction",
+      "NotResource": [
+        "arn:aws:lambda:*:*:function:AMS*",
+        "arn:aws:lambda:*:*:function:ams*",
+        "arn:aws:lambda:*:*:function:Sentinel*",
+        "arn:aws:lambda:*:*:function:sentinel*"
+      ]
+    },
+    {
+      "Condition": {
+        "ForAnyValue:StringNotLike": {
+          "aws:RequestTag/Name": [
+            "ams*",
+            "AMS*",
+            "Ams*",
+            "mc*",
+            "MC*",
+            "sentinel*",
+            "Sentinel*"
+          ]
+        }
+      },
+      "Action": [
+        "events:TagResource",
+        "events:PutEvents",
+        "schemas:TagResource"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "EventAndSchemaTagPermissions"
+    },
+    {
+      "Action": [
+        "events:CreateEventBus",
+        "events:CreatePartnerEventSource",
+        "schemas:CreateDiscoverer",
+        "schemas:CreateRegistry",
+        "events:ActivateEventSource",
+        "events:DeactivateEventSource",
+        "events:DeleteEventBus",
+        "events:DeleteRule",
+        "events:DisableRule",
+        "events:EnableRule",
+        "events:DeletePartnerEventSource",
+        "events:PutRule",
+        "events:PutTargets",
+        "events:RemoveTargets",
+        "schemas:CreateSchema",
+        "schemas:DeleteDiscoverer",
+        "schemas:DeleteSchema",
+        "schemas:DeleteSchemaVersion",
+        "schemas:DeleteRegistry",
+        "schemas:DeleteResourcePolicy",
+        "schemas:PutCodeBinding",
+        "schemas:PutResourcePolicy"
+      ],
+      "Effect": "Allow",
+      "Sid": "AllowPermissionsToManagedEventBus",
+      "NotResource": [
+        "arn:aws:events:*:*:event-bus/AMS*",
+        "arn:aws:events:*:*:event-bus/ams*",
+        "arn:aws:events:*:*:event-bus/mc*",
+        "arn:aws:events:*:*:rule/AMS*",
+        "arn:aws:events:*:*:rule/ams*",
+        "arn:aws:events:*:*:rule/EC2CWAlarmCleanupEvent",
+        "arn:aws:events:*:*:rule/mc*",
+        "arn:aws:events:*:*:rule/StackSet-ams*",
+        "arn:aws:events:*:*:event-source/AMS*",
+        "arn:aws:events:*:*:event-source/ams*",
+        "arn:aws:events:*:*:event-source/mc*",
+        "arn:aws:schemas:*:*:schema/AMS*",
+        "arn:aws:schemas:*:*:schema/ams*",
+        "arn:aws:schemas:*:*:schema/mc*",
+        "arn:aws:schemas:*:*:registry/AMS*",
+        "arn:aws:schemas:*:*:registry/ams*",
+        "arn:aws:schemas:*:*:registry/mc*",
+        "arn:aws:schemas:*:*:discoverer/AMS*",
+        "arn:aws:schemas:*:*:discoverer/mc*"
+      ]
+    },
+    {
+      "Condition": {
+        "ForAnyValue:StringNotLike": {
+          "aws:ResourceTag/Name": [
+            "ams*",
+            "Ams*",
+            "mc*",
+            "MC*",
+            "AMS*",
+            "sentinel*",
+            "Sentinel*"
+          ]
+        }
+      },
+      "Action": [
+        "events:UntagResource",
+        "schemas:StartDiscoverer",
+        "schemas:StopDiscoverer",
+        "schemas:UpdateDiscoverer",
+        "schemas:UpdateRegistry",
+        "schemas:UpdateSchema",
+        "schemas:UntagResource"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "AllowDiscoverRegistryPermissions"
+    },
+    {
+      "Action": [
+        "events:PutPartnerEvents",
+        "events:PutPermission",
+        "events:RemovePermission"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "NoRLPAllowPermissionsToManageEventBus"
+    }
+  ]
+}

@@ -1,0 +1,905 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "MSSQL for Prod Environment",
+    "Parameters": {
+        "EnvName": {
+            "Description": "(REQUIRED) Enter Environment Type (Dev/QA/Prod)",
+            "Default": "Prod",
+            "Type": "String",
+            "AllowedValues": [
+                "Non-Prod",
+                "QA",
+                "Prod"
+            ]
+        },
+        "Project": {
+            "Type": "String",
+            "Default": "MSSQL RDS for prod",
+            "Description": "(REQUIRED) Enter the Project Name"
+        },
+        "PrivateSubnetAZ1A": {
+            "Default": "subnet-009318075dde4e6f0",
+            "Description": "(REQUIRED) CIDR Block for the private subnet 1 located in Availability Zone 1",
+            "Type": "String"
+        },
+        "PrivateSubnetAZ1B": {
+            "Default": "subnet-032a0b2987c7af20b",
+            "Description": "(REQUIRED) CIDR Block for the private subnet 1 located in Availability Zone 2",
+            "Type": "String"
+        },
+        "ResourceImportName": {
+            "Type": "String",
+            "Default": "IOP"
+        },
+        "DBInstanceIdentifier": {
+            "Description": "(REQUIRED) 'Please Enter DB Instance Identifier'",
+            "Type": "String",
+            "Default": "iop-prod-sql-rds"
+        },
+        "DBSnapshotIdentifier": {
+            "Description": "(OPTIONAL) 'Optional name or Amazon Resource Name (ARN) of the DB snapshot from which you want to restore (leave blank to create an empty database).'",
+            "Type": "String",
+            "Default": ""
+        },
+        "DBAllocatedStorage": {
+            "Description": "(REQUIRED) 'The allocated storage size, specified in GB (ignored when DBSnapshotIdentifier is set, value used from snapshot).'",
+            "Type": "Number",
+            "Default": 500,
+            "MinValue": 5,
+            "MaxValue": 16384
+        },
+        "DBMaxAllocatedStorage": {
+            "Description": "(OPTIONAL) 'The upper limit in gibibytes (GiB) to which Amazon RDS can automatically scale the storage of the DB instance'",
+            "Type": "Number",
+            "Default": 1500,
+            "MinValue": 5,
+            "MaxValue": 16384
+        },
+        "DBInstanceClass": {
+            "AllowedValues": [
+                "db.m5.large",
+                "db.m5.xlarge",
+                "db.m5.2xlarge",
+                "db.m5.4xlarge",
+                "db.m5.12xlarge",
+                "db.m5.24xlarge",
+                "db.m4.large",
+                "db.m4.xlarge",
+                "db.m4.2xlarge",
+                "db.m4.4xlarge",
+                "db.m4.10xlarge",
+                "db.m4.16xlarge",
+                "db.r5.large",
+                "db.r5.xlarge",
+                "db.r5.2xlarge",
+                "db.r5.4xlarge",
+                "db.r5.8xlarge",
+                "db.r5.16xlarge"
+            ],
+            "ConstraintDescription": "Must select a valid database instance type.",
+            "Default": "db.m5.large",
+            "Description": "The name of the compute and memory capacity class of the database instance.",
+            "Type": "String"
+        },
+        "SQLDBName": {
+            "Description": "(REQUIRED) 'Database name'",
+            "Type": "String",
+            "Default": ""
+        },
+        "DBBackupRetentionPeriod": {
+            "Description": "(REQUIRED) 'The number of days to keep snapshots of the database.'",
+            "Type": "Number",
+            "MinValue": 0,
+            "MaxValue": 35,
+            "Default": 30
+        },
+        "DBMultiAZFalse": {
+            "Description": "(REQUIRED) 'Specifies if the database instance is deployed to multiple Availability Zones for HA.'",
+            "Type": "String",
+            "Default": false,
+            "AllowedValues": [
+                true,
+                false
+            ]
+        },
+        "DBMultiAZTrue": {
+            "Description": "(REQUIRED) 'Specifies if the database instance is deployed to multiple Availability Zones for HA.'",
+            "Type": "String",
+            "Default": true,
+            "AllowedValues": [
+                true,
+                false
+            ]
+        },
+        "DBEncrypted": {
+            "Description": "(REQUIRED) 'Specifies if the database instance must be encrypted'",
+            "Type": "String",
+            "Default": true,
+            "AllowedValues": [
+                true,
+                false
+            ]
+        },
+        "PreferredBackupWindow": {
+            "Description": "(REQUIRED) 'The daily time range in UTC during which you want to create automated backups.'",
+            "Type": "String",
+            "Default": "23:30-00:30"
+        },
+        "PreferredMaintenanceWindow": {
+            "Description": "(REQUIRED) The weekly time range (in UTC) during which system maintenance can occur.",
+            "Type": "String",
+            "Default": "sun:02:30-sun:03:30"
+        },
+        "Engine": {
+            "AllowedValues": [
+                "sqlserver-ee",
+                "sqlserver-se",
+                "sqlserver-ex",
+                "sqlserver-web"
+            ],
+            "ConstraintDescription": "Must select a MSSQL Database Engine Edition.",
+            "Default": "sqlserver-se",
+            "Description": "MSSQL Database Engine Edition.",
+            "Type": "String"
+        },
+        "EngineVersion": {
+            "Description": "(REQUIRED) 'Sql Server Standard Edition Version'",
+            "Type": "String",
+            "Default": "14.00.3356.20.v1",
+            "AllowedValues": [
+                "14.00.3356.20.v1",
+                "14.00.3294.2.v1",
+                "14.00.3281.6.v1",
+                "14.00.3223.3.v1",
+                "14.00.3192.2.v1",
+                "14.00.3049.1.v1"
+            ]
+        },
+        "EngineVersion2019": {
+            "Description": "(REQUIRED) 'Sql Server Standard Edition Version'",
+            "Type": "String",
+            "Default": "15.00.4073.23.v1",
+            "AllowedValues": [
+				"15.00.4073.23.v1",
+				"15.00.4043.16.v1"
+            ]
+        },
+        "ADDomainRDSAuthenticationID": {
+            "Description": "(REQUIRED) 'AD Windows Authentication AD ID'",
+            "Type": "String",
+            "Default": "d-936709a96e"
+        },
+        "RDSLicenseModel": {
+            "Description": "(REQUIRED) 'RDS License Model'",
+            "Type": "String",
+            "Default": "license-included"
+        },
+        "RDSADServiceRole": {
+            "Description": "(REQUIRED) 'IAM role for RDS to connect to Managed AD'",
+            "Type": "String",
+            "Default": "customer_om_iopcapability_domain_join_role"
+        },
+        "RDSS3Role": {
+            "Description": "(REQUIRED) IAM role for RDS to connect to Managed AD",
+            "Type": "String",
+            "Default": "arn:aws:iam::419366612833:role/customer_om_iopcapability_rds_s3_role"
+        },
+        "S3IntegrationRoleBulkUpload": {
+            "Description": "(REQUIRED) IAM role for RDS to connect amazon S3",
+            "Type": "String",
+            "Default": "arn:aws:iam::419366612833:role/customer_om_iopcapability_s3_upload_role_exec"
+        }
+    },
+    "Mappings": {
+        "ResourceTags": {
+            "ec2": {
+                "Backup": "true",
+                "DataClassification": "Confidential",
+                "HoursOfOperation": "07:00-19:00",
+                "PatchGroup": "OMIA - week-end -",
+                "Tier": "Front End"
+            },
+            "PatchOrder": {
+                "Active": "2",
+                "Passive": "1"
+            },
+            "rds": {
+                "HoursOfOperation": "07:00-19:00",
+                "DataClassification": "Confidential",
+                "Tier": "Data"
+            },
+            "all": {
+                "BudgetCentre": "",
+                "Budget": "NA",
+                "Cluster": "OM Capability Cluster",
+                "Department": "OML IT Operations",
+                "Owner": "Jakoos Olivier",
+                "OwnerTeam": "OM Core Tech: Middleware",
+                "OwnerTeamEmail": "",
+                "SupportContact": "",
+                "Tier": "Database",
+                "Environment": "Prod",
+                "AppId": "APP11533"
+            }
+        }
+    },
+    "Conditions": {
+        "HasKmsKey": {
+            "Fn::Equals": [
+                {
+                    "Ref": "DBEncrypted"
+                },
+                "true"
+            ]
+        },
+        "HasDBSnapshotIdentifier": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "DBSnapshotIdentifier"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "HasKmsKeyAndNotDBSnapshotIdentifier": {
+            "Fn::And": [
+                {
+                    "Condition": "HasKmsKey"
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Condition": "HasDBSnapshotIdentifier"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "Resources": {
+        "KmsKeyForRDSIOPProd": {
+            "Type": "AWS::KMS::Key",
+            "Condition": "HasKmsKey",
+            "Properties": {
+                "Description": {
+                    "Fn::Sub": "Created by ${AWS::StackName}"
+                },
+                "EnableKeyRotation": true,
+                "KeyPolicy": {
+                    "Version": "2012-10-17",
+                    "Id": "key-default-1",
+                    "Statement": [
+                        {
+                            "Sid": "Enable root Permissions",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root"
+                                }
+                            },
+                            "Action": "kms:*",
+                            "Resource": "*"
+                        },
+                        {
+                            "Sid": "Enable RDS Service Permissions",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": "*"
+                            },
+                            "Action": [
+                                "kms:Encrypt",
+                                "kms:Decrypt",
+                                "kms:ReEncrypt*",
+                                "kms:GenerateDataKey*",
+                                "kms:CreateGrant",
+                                "kms:ListGrants",
+                                "kms:DescribeKey"
+                            ],
+                            "Resource": "*",
+                            "Condition": {
+                                "StringEquals": {
+                                    "kms:CallerAccount": {
+                                        "Ref": "AWS::AccountId"
+                                    },
+                                    "kms:ViaService": {
+                                        "Fn::Sub": "rds.${AWS::Region}.amazonaws.com"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "BudgetCentre",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "BudgetCentre"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Budget",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Budget"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Department",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Department"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Owner"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "OwnerTeam",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "OwnerTeam"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "OwnerTeamEmail",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "OwnerTeamEmail"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Tier",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Tier"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Environment"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AppId",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "AppId"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "KMSKeyAliasForRDS": {
+            "Condition": "HasKmsKey",
+            "Type": "AWS::KMS::Alias",
+            "Properties": {
+                "AliasName": {
+                    "Fn::Sub": "alias/${AWS::StackName}-KmsKeyForRDSIOPProd"
+                },
+                "TargetKeyId": {
+                    "Ref": "KmsKeyForRDSIOPProd"
+                }
+            }
+        },
+        "DBSubnetGroupProd": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupDescription": {
+                    "Ref": "AWS::StackName"
+                },
+                "SubnetIds": [
+                    {
+                        "Ref": "PrivateSubnetAZ1A"
+                    },
+                    {
+                        "Ref": "PrivateSubnetAZ1B"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "BudgetCentre",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "BudgetCentre"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Budget",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Budget"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Department",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Department"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Owner"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "OwnerTeam",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "OwnerTeam"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "OwnerTeamEmail",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "OwnerTeamEmail"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Tier",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Tier"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Environment"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AppId",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "AppId"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "RdsCustomDBParameterGroupProd": {
+            "Type": "AWS::RDS::DBParameterGroup",
+            "Properties": {
+                "Description": "iop-sqlserver-se-14",
+                "Family": "sqlserver-se-14.0",
+                "Parameters": {
+                    "in-doubt xact resolution": 2
+                }
+            }
+        },
+		"RdsCustomDBParameterGroup15": {
+            "Type": "AWS::RDS::DBParameterGroup",
+            "Properties": {
+                "Description": "iop-sqlserver-se-15",
+                "Family": "sqlserver-se-15.0",
+                "Parameters": {
+                    "in-doubt xact resolution": 2
+                }
+            }
+        },
+        "RdsOptionGroupProd": {
+            "Type": "AWS::RDS::OptionGroup",
+            "Properties": {
+                "EngineName": "sqlserver-se",
+                "MajorEngineVersion": "15.00",
+                "OptionGroupDescription": "enable native backup/restore to/from S3 and MSDTC",
+                "OptionConfigurations": [
+                    {
+                        "OptionName": "SQLSERVER_BACKUP_RESTORE",
+                        "OptionSettings": [
+                            {
+                                "Name": "IAM_ROLE_ARN",
+                                "Value": {
+                                    "Ref": "RDSS3Role"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "OptionName": "MSDTC",
+                        "Port": 5000,
+                        "VpcSecurityGroupMemberships": [
+                            {
+                                "Fn::ImportValue": {
+                                    "Fn::Sub": "${EnvName}-${ResourceImportName}-DB-SecurityGroupId"
+                                }
+                            }
+                        ],
+                        "OptionSettings": [
+                            {
+                                "Name": "AUTHENTICATION",
+                                "Value": "MUTUAL"
+                            },
+                            {
+                                "Name": "TRANSACTION_LOG_SIZE",
+                                "Value": 1024
+                            },
+                            {
+                                "Name": "ENABLE_XA",
+                                "Value": true
+                            },
+                            {
+                                "Name": "ENABLE_SNA_LU",
+                                "Value": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "IOPPRODRDSSQLSecret": {
+            "Type": "AWS::SecretsManager::Secret",
+            "Properties": {
+                "Description": "This is the secret for Prod RDS instance",
+                "GenerateSecretString": {
+                    "SecretStringTemplate": "{\"username\": \"sqladmin\"}",
+                    "GenerateStringKey": "password",
+                    "ExcludeCharacters": "\"@/\\"
+                }
+            }
+        },
+        "DBInstanceProd": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBInstanceIdentifier": {
+                    "Ref": "DBInstanceIdentifier"
+                },
+                "AllocatedStorage": {
+                    "Fn::If": [
+                        "HasDBSnapshotIdentifier",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Ref": "DBAllocatedStorage"
+                        }
+                    ]
+                },
+				"MaxAllocatedStorage": {
+                    "Fn::If": [
+                        "HasDBSnapshotIdentifier",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Ref": "DBMaxAllocatedStorage"
+                        }
+                    ]
+                },
+                "AllowMajorVersionUpgrade": true,
+                "AutoMinorVersionUpgrade": true,
+                "BackupRetentionPeriod": {
+                    "Ref": "DBBackupRetentionPeriod"
+                },
+                "CopyTagsToSnapshot": true,
+                "DeletionProtection": false,
+                "DBInstanceClass": {
+                    "Ref": "DBInstanceClass"
+                },
+                "DBSnapshotIdentifier": {
+                    "Fn::If": [
+                        "HasDBSnapshotIdentifier",
+                        {
+                            "Ref": "DBSnapshotIdentifier"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "DBSubnetGroupName": {
+                    "Ref": "DBSubnetGroupProd"
+                },
+                "DBParameterGroupName": {
+                    "Ref": "RdsCustomDBParameterGroup15"
+                },
+                "OptionGroupName": {
+                    "Ref": "RdsOptionGroupProd"
+                },
+                "Engine": {
+                    "Ref": "Engine"
+                },
+                "EngineVersion": {
+                    "Ref": "EngineVersion2019"
+                },
+                "KmsKeyId": {
+                    "Fn::If": [
+                        "HasKmsKeyAndNotDBSnapshotIdentifier",
+                        {
+                            "Ref": "KMSKeyAliasForRDS"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "MasterUsername": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "{{resolve:secretsmanager:",
+                            {
+                                "Ref": "IOPPRODRDSSQLSecret"
+                            },
+                            ":SecretString:username}}"
+                        ]
+                    ]
+                },
+                "MasterUserPassword": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "{{resolve:secretsmanager:",
+                            {
+                                "Ref": "IOPPRODRDSSQLSecret"
+                            },
+                            ":SecretString:password}}"
+                        ]
+                    ]
+                },
+                "MultiAZ": {
+                    "Ref": "DBMultiAZTrue"
+                },
+                "PreferredBackupWindow": {
+                    "Ref": "PreferredBackupWindow"
+                },
+                "PreferredMaintenanceWindow": {
+                    "Ref": "PreferredMaintenanceWindow"
+                },
+                "StorageType": "gp2",
+                "Timezone": "South Africa Standard Time",
+                "StorageEncrypted": {
+                    "Fn::If": [
+                        "HasDBSnapshotIdentifier",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Fn::If": [
+                                "HasKmsKey",
+                                true,
+                                false
+                            ]
+                        }
+                    ]
+                },
+                "Domain": {
+                    "Ref": "ADDomainRDSAuthenticationID"
+                },
+                "DomainIAMRoleName": {
+                    "Ref": "RDSADServiceRole"
+                },
+                "LicenseModel": {
+                    "Ref": "RDSLicenseModel"
+                },
+                "VPCSecurityGroups": [
+                    {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${EnvName}-${ResourceImportName}-DB-SecurityGroupId"
+                        }
+                    }
+                ],
+                "AssociatedRoles": [
+                    {
+                        "FeatureName": "S3_INTEGRATION",
+                        "RoleArn": {
+                            "Ref": "S3IntegrationRoleBulkUpload"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "PatchOrder",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "PatchOrder",
+                                "Active"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "DataClassification",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "rds",
+                                "DataClassification"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "HoursOfOperation",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "rds",
+                                "HoursOfOperation"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "BudgetCentre",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "BudgetCentre"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Budget",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Budget"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Department",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Department"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Owner"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "OwnerTeam",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "OwnerTeam"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "OwnerTeamEmail",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "OwnerTeamEmail"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Tier",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "rds",
+                                "Tier"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "ResourceTags",
+                                "all",
+                                "Environment"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "SecretRDSInstanceAttachment": {
+            "Type": "AWS::SecretsManager::SecretTargetAttachment",
+            "Properties": {
+                "SecretId": {
+                    "Ref": "IOPPRODRDSSQLSecret"
+                },
+                "TargetId": {
+                    "Ref": "DBInstanceProd"
+                },
+                "TargetType": "AWS::RDS::DBInstance"
+            }
+        }
+    },
+    "Outputs": {
+        "StackName": {
+            "Description": "Stack Name",
+            "Value": {
+                "Fn::Sub": "${AWS::StackName}"
+            }
+        },
+        "RDSInstance": {
+            "Description": "IOP  Prod RDS",
+            "Value": {
+                "Ref": "DBInstanceProd"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-DBInstanceProd"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 900
+      MemorySize: 512
+      Handler: com.om.gc.S3FilePutTriggerLambda::handleRequest
+      CodeUri: /home/pp/git/Group_Compliance/SFTP-to-S3-lambda
+      Runtime: java8
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          AWS_REGION: eu-west-1
+          AWS_SM_SECRET_NAME: oml-cs-ai-non-prod-compliance-secrets
+          AWS_STS_SERVICE_END_POINT: sts.eu-west-1.amazonaws.com
+          ROLE_ARN: arn:aws:iam::332760374405:role/customer_om_cs-ai-groupcompliance-nonprod-lambda-execution-role
+          ROLE_SESSION_NAME: GroupComplianceSFTPRDSIngestion
+          EMAIL_SEND_TOPIC_ARN: arn:aws:sns:eu-west-1:342478014409:OML-Group-Complience-Dataload

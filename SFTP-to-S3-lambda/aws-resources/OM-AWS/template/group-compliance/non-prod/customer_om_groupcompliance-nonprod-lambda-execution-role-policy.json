@@ -1,0 +1,123 @@
+
+/*Use Case: Create a lambda Execution Role for Lambda execution for Group Compliance Non Prod*/
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "secretsmanager:ListSecrets"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Effect": "Allow",
+      "Sid": "SecretsListAllow"
+    },
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream"
+      ],
+      "Resource": "arn:aws:logs:*:342478014409:log-group:*",
+      "Effect": "Allow",
+      "Sid": "AllowCreateLogGroup"
+    },
+    {
+      "Action": [
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:342478014409:log-group:*:log-stream:*",
+      "Effect": "Allow",
+      "Sid": "AllowPutLogs"
+    },
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:*:*:log-group:/AMS/*",
+        "arn:aws:logs:*:*:log-group:/Ams/*",
+        "arn:aws:logs:*:*:log-group:/ams/*",
+        "arn:aws:logs:*:*:log-group:/aws/AMS*",
+        "arn:aws:logs:*:*:log-group:/aws/Ams*",
+        "arn:aws:logs:*:*:log-group:/aws/ams*",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/AMS*",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/Ams*",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ams*",
+        "arn:aws:logs:*:*:log-group:/mc/*",
+        "arn:aws:logs:*:*:log-group:/MC/*",
+        "arn:aws:logs:*:*:log-group:/Mc/*"
+      ],
+      "Effect": "Deny",
+      "Sid": "DenyAMSLogGroups"
+    },
+    {
+      "Action": [
+        "s3:GetBucketTagging",
+        "s3:GetBucketAcl",
+        "s3:GetBucketPolicy",
+        "s3:GetBucketLocation",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::group-compliance-non-prod"
+      ],
+      "Effect": "Allow",
+      "Sid": "S3GDMBucketAccessPolicy"
+    },
+    {
+      "Action": [
+        "s3:DeleteObject",
+        "s3:GetObjectVersionTagging",
+        "s3:GetObjectAttributes",
+        "s3:GetObjectVersionAttributes",
+        "s3:GetObjectAcl",
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::group-compliance-non-prod/*"
+      ],
+      "Effect": "Allow",
+      "Sid": "S3ObjectAccess"
+    },
+    {
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "S3ListAllMyBuckets"
+    },
+    {
+      "Action": [
+        "secretsmanager:GetResourcePolicy",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:ListSecretVersionIds"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:eu-west-1:342478014409:secret:oml-group-compliance-secrets-TgsL76"
+      ],
+      "Effect": "Allow",
+      "Sid": "SecretsAllow"
+    },
+    {
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:eu-west-1:342478014409:function:SFTPToS3RDSLambdaFunction"
+      ],
+      "Effect": "Allow",
+      "Sid": "AllowInvokeFunction"
+    },
+    {
+      "Action": "sts:AssumeRole",
+      "Resource": "arn:aws:iam::342478014409:role/customer_om_groupcompliance-nonprod-lambda-execution-role",
+      "Effect": "Allow"
+    }
+  ]
+}

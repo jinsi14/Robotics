@@ -1,0 +1,20 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudFormation template for EventBridge rule 'GroupCompliance-lambda-trigger-daily-mid-night-load-rule'",
+  "Resources": {
+    "EventRule0": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "This Rule is a Trigger for lambda which will run daily at midnight 12.15 GMT",
+        "EventBusName": "default",
+        "Name": "GroupCompliance-lambda-trigger-daily-mid-night-load-rule",
+        "ScheduleExpression": "cron(15 00 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [{
+          "Id": "Id9ffb75ba-b717-40df-899f-da320f616d72",
+          "Arn": "arn:aws:lambda:eu-west-1:265757109115:function:SFTPToS3RDSLambdaFunction"
+        }]
+      }
+    }
+  }
+}

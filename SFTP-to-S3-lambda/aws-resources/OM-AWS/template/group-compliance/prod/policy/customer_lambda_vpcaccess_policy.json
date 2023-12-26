@@ -1,0 +1,34 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "AllowVpcEC2APIs"
+    },
+    {
+      "Condition": {
+        "ForAnyValue:StringNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/customer_lambda_basic_execution_role",
+            "arn:aws:iam::*:role/customer-rotate-secrets-lambda-role",
+            "arn:aws:iam::*:role/customer_code_pipeline_lambda_execution_role",
+            "arn:aws:iam::342478014409:role/customer_om_groupcompliance-nonprod-lambda-execution-role"
+          ]
+        }
+      },
+      "Action": [
+        "ec2:CreateNetwork*",
+        "ec2:DeleteNetworkInterface"
+      ],
+      "Resource": "*",
+      "Effect": "Deny",
+      "Sid": "DenyEC2APIExceptLambdaBasicExecRole"
+    }
+  ]
+}

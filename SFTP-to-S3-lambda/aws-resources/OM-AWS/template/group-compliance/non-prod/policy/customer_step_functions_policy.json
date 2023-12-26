@@ -1,0 +1,52 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "states:*"
+      ],
+      "Effect": "Allow",
+      "NotResource": [
+        "arn:aws:states:*:*:activity:ams*",
+        "arn:aws:states:*:*:activity:AMS*",
+        "arn:aws:states:*:*:execution:ams*",
+        "arn:aws:states:*:*:execution:AMS*",
+        "arn:aws:states:*:*:stateMachine:ams*",
+        "arn:aws:states:*:*:stateMachine:AMS*"
+      ]
+    },
+    {
+      "Condition": {
+        "StringLike": {
+          "iam:PassedToService": [
+            "states.amazonaws.com",
+            "states.*.amazonaws.com"
+          ]
+        }
+      },
+      "Action": "iam:PassRole",
+      "Effect": "Allow",
+      "NotResource": [
+        "arn:aws:iam::*:role/service-role/ams*",
+        "arn:aws:iam::*:role/ams*",
+        "arn:aws:iam::*:role/service-role/AMS",
+        "arn:aws:iam::*:role/AMS"
+      ]
+    },
+    {
+      "Action": [
+        "iam:ListRoles",
+        "sns:ListTopics",
+        "lambda:ListFunctions",
+        "sqs:ListQueues",
+        "batch:DescribeJobDefinitions",
+        "batch:DescribeJobQueues",
+        "ecs:ListTaskDefinitions",
+        "dynamodb:ListTables",
+        "glue:ListJobs"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    }
+  ]
+}

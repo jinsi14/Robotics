@@ -1,0 +1,77 @@
+Update the HoursOfOperation: CT: ct-2pkdckieh62ps
+
+
+
+CHG0786092
+CHG0781778
+CHG0781764
+
+SAM_CLI_BETA_MAVEN_SCOPE_AND_LAYER=1 sam build Function --template /home/pp/git/Group_Compliance/SFTP-to-S3-lambda/aws-resources/template.yaml
+
+OM Commands
+aada login -p OM-Prashant
+
+#GC-NonPROD SSPS
+aada login -p OM-GC-NonProd-SSPS-Prashant
+
+
+
+aws s3 ls --profile OM-GC-NonProd-SSPS-Prashant
+
+
+
+Ref: https://oml.service-now.com/nav_to.do?uri=%2Fchange_request.do%3Fsys_id%3D78d39d0e87f5c150aa80ea030cbb359d%26sysparm_record_list%3Dassignment_group%253d88052bc84f947f0014057e918110c7de%255eORx_aws_ams_connect_rfc_idISNOTEMPTY%255e123TEXTQUERY321%253dcustomer_om_cs-ai-groupcompliance-nonprod-lambda-execution-role%255eORDERBYzztextsearchyy%26sysparm_record_row%3D1%26sysparm_record_rows%3D5%26sysparm_record_target%3Dchange_request%26sysparm_view%3Dams%26sysparm_view_forced%3Dtrue
+
+
+Hi AMS Team,
+Can you please help in this RFC.
+My 3 RFCs got cancelled
+CHG0786092
+CHG0781778
+CHG0781764
+I am not sure what is the root cause of this problem.
+Your help will be very helpful to me in fast-tracking this procedure.
+Thank you.
+
+1. Create Lambda Execution Role:
+    Non Prod:
+    Prod:
+
+2. Create S3 Bucket
+   Group Compliance
+    Non Prod:
+        Description: Create an S3 Bucket for Group Compliance Non Prod Environment
+        Name: group-compliance-non-prod
+        IAMPrincipalsRequiringReadObjectAccess:arn:aws:iam::342478014409:role/customer_om_group_compliance_ssps_role
+        IAMPrincipalsRequiringWriteObjectAccess:arn:aws:iam::342478014409:role/customer_om_group_compliance_ssps_role
+        ServicesRequiringReadObjectAccess:lambda.eu-west-1.amazonaws.com
+        ServicesRequiringWriteObjectAccess:lambda.eu-west-1.amazonaws.com
+
+    Prod:
+        Description: Create an S3 Bucket for Group Compliance Prod Environment
+        Name: group-compliance-prod
+        IAMPrincipalsRequiringReadObjectAccess:arn:aws:iam::265757109115:role/customer_om_group_compliance_ssps_role
+        IAMPrincipalsRequiringWriteObjectAccess:arn:aws:iam::265757109115:role/customer_om_group_compliance_ssps_role
+        ServicesRequiringReadObjectAccess:lambda.eu-west-1.amazonaws.com
+        ServicesRequiringWriteObjectAccess:lambda.eu-west-1.amazonaws.com
+
+3. Create Secrets: using AWSManagedServiceAdminRole
+    Secret Name : group-compliance-secrets
+    Description : Group Compliance DCC Application Secrets.
+
+4. Allow The SSPS role to pass Role Policy : customer_lambda_admin_policy.json
+    - Additionally Add Managed Services Policy: AWSLambdaBasicExecutionRole, AWSXrayWriteOnlyAccess
+
+5. Update Customer VPC Policy & Attach it with Lambda Execution Role
+    Non PROD: https://us-east-1.console.aws.amazon.com/managedservices/rfc/dabfe796-bdb5-addb-7e52-636d8c77cbbd
+    PROD:
+
+6. Update customer_lambda_admin_policy attached with Lambda Execution Role
+    Non PROD: https://us-east-1.console.aws.amazon.com/managedservices/rfc/68bfe7aa-755f-ca50-446a-a6c305d6ecc0
+    PROD:
+
+7. Create a policy for email(SNS) send allowing publish a message to topic and attached it in to lambda role.
+    Name: customer_om_group_compliance_lambda_sns_policy
+    Non PROD: https://oml.service-now.com/change_request.do?sys_id=61b55e431bba0950d895ffb5464bcbf4&sysparm_domain=null&sysparm_domain_scope=null&sysparm_view=ams&sysparm_view_forced=true
+    PROD: https://us-east-1.console.aws.amazon.com/managedservices/rfc/1ac0253f-98fe-1f20-443b-8279106a8b2b
+        https://oml.service-now.com/nav_to.do?uri=%2Fchange_request.do%3Fsys_id%3D107aa7a087cb8590a8eb43b90cbb354d%26sysparm_record_list%3Dactive%253dtrue%255e123TEXTQUERY321%253dCHG0919912%255eORDERBYzztextsearchyy%26sysparm_record_row%3D1%26sysparm_record_rows%3D1%26sysparm_record_target%3Dchange_request%26sysparm_view%3Dams%26sysparm_view_forced%3Dtrue

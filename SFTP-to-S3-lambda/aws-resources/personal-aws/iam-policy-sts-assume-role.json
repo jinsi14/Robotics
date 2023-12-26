@@ -1,0 +1,25 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::713528111139:role/iam-S3-lambda-role-personal"
+        }
+    ]
+}
+
+/*---Lambda Execution to Assume Role
+---
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AssumeRoleSid",
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::332760374405:role/customer_om_cs-ai-groupcompliance-nonprod-lambda-execution-role"
+        }
+    ]
+}*/

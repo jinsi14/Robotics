@@ -1,0 +1,16 @@
+
+
+
+1. Create SG for PROD/Non PROD it will export the value for DB-SG
+
+
+https://groupcompliance-nonprod-cfn.s3.eu-west-1.amazonaws.com/SG/Non-PROD-DB-SG.json
+
+Non PROD: RDS
+#Presign S3 CFN for 1 week - GC Non PROD
+#Presign with Admin Role not with SSPS as we raise RFC with Admin
+Command:
+    aws s3 presign --profile OM-GC-NonProd-AWSMAdmin-Prashant s3://groupcompliance-nonprod-cfn/RDS/group-compliance_dev_cft.json --expires-in 604800
+Provide S3 HTTPS URL:
+
+

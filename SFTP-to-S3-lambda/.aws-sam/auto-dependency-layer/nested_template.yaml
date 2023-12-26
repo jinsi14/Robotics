@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS SAM CLI Nested Stack for Auto Dependency Layer Creation
+Metadata:
+  SamCliInfo: 1.40.0
+  key: AWS SAM CLI sync command
+Outputs:
+  SFTPToS3RDSLambdaFunctioned6171ceDepLayer:
+    Value:
+      Ref: SFTPToS3RDSLambdaFunctioned6171ceDepLayer
+Resources:
+  SFTPToS3RDSLambdaFunctioned6171ceDepLayer:
+    Metadata:
+      CreatedBy: AWS SAM CLI sync command
+    Properties:
+      CompatibleRuntimes:
+      - java8
+      ContentUri: /home/pp/git/Group_Compliance/SFTP-to-S3-lambda/.aws-sam/auto-dependency-layer/SFTPToS3RDSLambdaFunctioned6171ceDepLayer
+      Description: Auto created layer for dependencies of function SFTPToS3RDSLambdaFunction
+      LayerName: SFTPS3LambdaStacaddc6d28-SFTPToS3RDSLambdaFuncted6171ce-DepLayer
+      RetentionPolicy: Delete
+    Type: AWS::Serverless::LayerVersion
+Transform: AWS::Serverless-2016-10-31

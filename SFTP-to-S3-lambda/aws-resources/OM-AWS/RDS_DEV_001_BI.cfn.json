@@ -1,0 +1,1748 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "SQL Server 2019 RDS Instance with BI Features",
+    "Parameters": {
+        "SnapshotID": {
+            "Description": "Snapshot to be used as base image",
+            "Type": "String",
+            "Default": "arn:aws:rds:eu-west-1:547898946073:snapshot:rds:gf-547898946073-sataudit-nonprod-2021-06-23-22-47",
+            "AllowedValues": [
+                "arn:aws:rds:eu-west-1:547898946073:snapshot:rds:gf-547898946073-sataudit-nonprod-2021-06-23-22-47"
+            ]
+        },
+        "RDSAllocatedStorage": {
+            "Description": "The size of the database (in GB).",
+            "Type": "String",
+            "Default": "2000"
+        },
+        "RDSMaxStorage": {
+            "Description": "The max size of the database (in GB).",
+            "Type": "Number",
+            "Default": 2000
+        },
+        "RDSAllowMajorVersionUpgrade": {
+            "Description": "True to allow updates to the DB instance's major version.",
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "false"
+        },
+        "RDSAutoMinorVersionUpgrade": {
+            "Description": "True to apply minor engine upgrades automatically to the DB instance during the maintenance window.",
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "false"
+        },
+        "RDSBackupRetentionPeriod": {
+            "Default": "7",
+            "Description": "The number of days for which automatic DB snapshots are retained. Setting to 0 disables automated backups.",
+            "Type": "String"
+        },
+        "RDSCharacterSetName": {
+            "Description": "For oracle engines, specifies the character set to associate with the DB instance.",
+            "Type": "String",
+            "Default": ""
+        },
+        "RDSDBEngine": {
+            "Description": "The name of the database engine that the DB instance uses.",
+            "Type": "String",
+            "Default": "sqlserver-ee",
+            "AllowedValues": [
+                "mysql",
+                "oracle-se2",
+                "oracle-se1",
+                "oracle-se",
+                "oracle-ee",
+                "sqlserver-ee",
+                "sqlserver-se",
+                "sqlserver-ex",
+                "sqlserver-web",
+                "postgres"
+            ]
+        },
+        "RDSDBInstanceIdentifier": {
+            "Description": "A name for the DB instance. If left blank AWS CloudFormation generates a unique physical ID and uses that ID for the DB instance.",
+            "Type": "String",
+            "AllowedPattern": "^$|^[a-z0-9-]{1,63}$",
+            "Default": "sat-547898946073-sataudit-nonprod"
+        },
+        "RDSDBName": {
+            "Description": "The database name.",
+            "Type": "String",
+            "Default": "sat-audit"
+        },
+        "RDSDBParameterGroupName": {
+            "Description": "The name of an existing DB parameter group.",
+            "Type": "String",
+            "Default": "sqlserver-ee-15-00"
+        },
+        "RDSDeletionProtection": {
+            "Description": "Instance cannot be deleted when this is set to true. Default is false.",
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "false"
+        },
+        "RDSDomain": {
+            "Description": "The Active Directory directory ID to create the instance in. This is applicable only for an Amazon RDS DB instance that's running Microsoft SQL Server.",
+            "Type": "String",
+            "AllowedPattern": "^$|^d-[0-9a-f]{10}$",
+            "Default": "d-93670bd31c"
+        },
+        "RDSDomainIAMRoleName": {
+            "Description": "The name of an IAM role that Amazon RDS uses when calling the AWS Directory Service APIs.",
+            "Type": "String",
+            "AllowedPattern": "^$|^customer[\\w-]+$",
+            "Default": "customer_oml_datatech_rds_ds_role"
+        },
+        "RDSEngineVersion": {
+            "Description": "The version number of the database engine to use.",
+            "Type": "String",
+            "Default": "15.00.4073.23.v1"
+        },
+        "RDSInstanceType": {
+            "Description": "The RDS instance type.",
+            "Type": "String",
+            "Default": "db.r5.xlarge"
+        },
+        "RDSIOPS": {
+            "Default": "0",
+            "Description": "IOPS for RDS Storage, 0 to disable IOPS.",
+            "Type": "String"
+        },
+        "RDSLicenseModel": {
+            "Description": "License model information for this DB instance. Applicable only if RDSDBEngine = oracle-se1 or oracle-se2.",
+            "Type": "String",
+            "AllowedValues": [
+                "bring-your-own-license",
+                "license-included"
+            ],
+            "Default": "license-included"
+        },
+        "RDSMultiAZ": {
+            "Description": "Whether or not the RDS instance should be MultiAZ.",
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "false"
+        },
+        "RDSOptionGroupName": {
+            "Description": "The option group that this DB instance is associated with.",
+            "Type": "String",
+            "Default": "stack-8bnblmhux8t0oly3w-sql2017optiongroup-jg46mqidw490"
+        },
+        "RDSPort": {
+            "Description": "The port for the instance. If it is 0, it will assign the default based on Database Engine.",
+            "Type": "String",
+            "Default": "1433"
+        },
+        "RDSPreferredBackupWindow": {
+            "Default": "22:00-23:00",
+            "Description": "The daily time range during which automated backups are created if automated backups are enabled, as determined by the BackupRetentionPeriod. Must be in the format hh24:mi-hh24:mi. Times should be in Universal Coordinated Time (UTC). Must not conflict with the preferred maintenance window. Must be at least 30 minutes. If left blank a 30-minute window is selected at random from an 8-hour block of time for each AWS Region.",
+            "AllowedPattern": "^$|^[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}$",
+            "Type": "String"
+        },
+        "RDSPreferredMaintenanceWindow": {
+            "Default": "sun:00:00-sun:02:00",
+            "Description": "The weekly time range (in UTC) during which system maintenance can occur. If left blank a 30-minute window selected at random from an 8-hour block of time for each AWS Region, occurring on a random day of the week.",
+            "AllowedPattern": "^$|[a-z]{3}:[0-9]{2}:[0-9]{2}-[a-z]{3}:[0-9]{2}:[0-9]{2}$",
+            "Type": "String"
+        },
+        "RDSStorageEncrypted": {
+            "Description": "Indicates whether the database instance is encrypted.",
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "true"
+        },
+        "RDSStorageEncryptionKey": {
+            "Default": "",
+            "Description": "Specify the ARN of the Custom KMS key to encrypt the database, if not, RDS will use the default one.",
+            "Type": "String",
+            "AllowedPattern": "(arn:aws:kms:.*)|(^$)"
+        },
+        "RDSStorageType": {
+            "Description": "The storage type for the RDS Instance.",
+            "Type": "String",
+            "Default": "gp2",
+            "AllowedValues": [
+                "standard",
+                "gp2",
+                "io1"
+            ]
+        },
+        "RDSSubnetIds": {
+            "Description": "The Subnets for the RDS instance to use.",
+            "Type": "List<AWS::EC2::Subnet::Id>",
+            "Default": "subnet-0cfc0adec06c7da2b,subnet-04a3a5873b6400f2a"
+        },
+        "RDSTimezone": {
+            "Description": "The time zone of the DB instance. This is applicable only for an Amazon RDS DB instance that's running Microsoft SQL Server.",
+            "Type": "String",
+            "Default": "South Africa Standard Time"
+        },
+        "SecurityGroups": {
+            "Description": "Default security groups for the database.",
+            "Type": "CommaDelimitedList",
+            "Default": "sg-0f44189f0706a068d"
+        },
+        "VpcId": {
+            "Description": "VPC ID.",
+            "Type": "AWS::EC2::VPC::Id",
+            "Default": "vpc-0aea82da233782c04"
+        }
+    },
+    "Mappings": {
+        "AmsChangeManagement": {
+            "ChangeType": {
+                "Id": "ct-2z60dyvto9g6c",
+                "Version": "3.0"
+            }
+        },
+        "RDSLicenseMap": {
+            "mysql": {
+                "RDSLicenseModel": "general-public-license"
+            },
+            "oracle-ee": {
+                "RDSLicenseModel": "bring-your-own-license"
+            },
+            "oracle-se": {
+                "RDSLicenseModel": "bring-your-own-license"
+            },
+            "oracle-se1": {
+                "RDSLicenseModel": "license-included"
+            },
+            "oracle-se2": {
+                "RDSLicenseModel": "license-included"
+            },
+            "sqlserver-ee": {
+                "RDSLicenseModel": "license-included"
+            },
+            "sqlserver-se": {
+                "RDSLicenseModel": "license-included"
+            },
+            "sqlserver-ex": {
+                "RDSLicenseModel": "license-included"
+            },
+            "sqlserver-web": {
+                "RDSLicenseModel": "license-included"
+            },
+            "postgres": {
+                "RDSLicenseModel": "postgresql-license"
+            }
+        }
+    },
+    "Metadata": {
+        "RevisionDate": "04-Mar-2019",
+        "AWS::CloudFormation::Designer": {
+            "f97ec8ee-721b-43b8-a212-f4a878f9a9fe": {
+                "size": {
+                    "width": 500,
+                    "height": 290
+                },
+                "position": {
+                    "x": -520,
+                    "y": -10
+                },
+                "z": 1,
+                "embeds": [
+                    "57f66c7d-68d8-4aa4-b74f-74fda8f8683d",
+                    "94d34ab6-32b0-4a3a-a71d-8c4b47482a25",
+                    "428196a0-0488-4274-a4ba-867fe63eb600"
+                ]
+            },
+            "428196a0-0488-4274-a4ba-867fe63eb600": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -490,
+                    "y": 50
+                },
+                "z": 2,
+                "parent": "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                "embeds": [],
+                "isassociatedwith": [
+                    "57f66c7d-68d8-4aa4-b74f-74fda8f8683d",
+                    "94d34ab6-32b0-4a3a-a71d-8c4b47482a25"
+                ],
+                "iscontainedinside": [
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                    "f97ec8ee-721b-43b8-a212-f4a878f9a9fe"
+                ]
+            },
+            "94d34ab6-32b0-4a3a-a71d-8c4b47482a25": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -320,
+                    "y": 70
+                },
+                "z": 2,
+                "parent": "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                "embeds": []
+            },
+            "57f66c7d-68d8-4aa4-b74f-74fda8f8683d": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -330,
+                    "y": 180
+                },
+                "z": 2,
+                "parent": "f97ec8ee-721b-43b8-a212-f4a878f9a9fe",
+                "embeds": []
+            }
+        }
+    },
+    "Outputs": {
+        "DatabaseEndpoint": {
+            "Description": "The FQDN for the stack's database.",
+            "Value": {
+                "Fn::GetAtt": [
+                    "RDSInstance",
+                    "Endpoint.Address"
+                ]
+            }
+        },
+        "DatabasePort": {
+            "Description": "The port for the stack's database.",
+            "Value": {
+                "Fn::GetAtt": [
+                    "RDSInstance",
+                    "Endpoint.Port"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "RDSSubnetGroup": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupDescription": "RDSSubnetIds available for the RDS DB Instance",
+                "SubnetIds": {
+                    "Ref": "RDSSubnetIds"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "f97ec8ee-721b-43b8-a212-f4a878f9a9fe"
+                }
+            }
+        },
+        "RDSInstance": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBSnapshotIdentifier": {
+                    "Ref": "SnapshotID"
+                },
+                "AllocatedStorage": {
+                    "Ref": "RDSAllocatedStorage"
+                },
+                "AllowMajorVersionUpgrade": {
+                    "Ref": "RDSAllowMajorVersionUpgrade"
+                },
+                "AutoMinorVersionUpgrade": {
+                    "Ref": "RDSAutoMinorVersionUpgrade"
+                },
+                "BackupRetentionPeriod": {
+                    "Ref": "RDSBackupRetentionPeriod"
+                },
+                "CharacterSetName": {
+                    "Fn::If": [
+                        "HasCharacterSetName",
+                        {
+                            "Ref": "RDSCharacterSetName"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "DBInstanceClass": {
+                    "Ref": "RDSInstanceType"
+                },
+                "DBInstanceIdentifier": {
+                    "Fn::If": [
+                        "HasDBInstanceIdentifier",
+                        {
+                            "Ref": "RDSDBInstanceIdentifier"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "DBName": {
+                    "Fn::If": [
+                        "IsMSSQL",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Ref": "RDSDBName"
+                        }
+                    ]
+                },
+                "DBParameterGroupName": {
+                    "Ref": "RDSDBP"
+                },
+                "DBSubnetGroupName": {
+                    "Ref": "RDSSubnetGroup"
+                },
+                "DeletionProtection": {
+                    "Ref": "RDSDeletionProtection"
+                },
+                "Domain": {
+                    "Fn::If": [
+                        "HasDomain",
+                        {
+                            "Ref": "RDSDomain"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "DomainIAMRoleName": {
+                    "Fn::If": [
+                        "HasDomain",
+                        {
+                            "Ref": "RDSDomainIAMRoleName"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "Engine": {
+                    "Ref": "RDSDBEngine"
+                },
+                "EngineVersion": {
+                    "Ref": "RDSEngineVersion"
+                },
+                "Iops": {
+                    "Fn::If": [
+                        "HasIOPS",
+                        {
+                            "Ref": "RDSIOPS"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "KmsKeyId": {
+                    "Fn::If": [
+                        "HasCustomEncryptionKey",
+                        {
+                            "Ref": "RDSStorageEncryptionKey"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "LicenseModel": {
+                    "Fn::If": [
+                        "IsOracleSe1OrSe2",
+                        {
+                            "Ref": "RDSLicenseModel"
+                        },
+                        {
+                            "Fn::FindInMap": [
+                                "RDSLicenseMap",
+                                {
+                                    "Ref": "RDSDBEngine"
+                                },
+                                "RDSLicenseModel"
+                            ]
+                        }
+                    ]
+                },
+                "MaxAllocatedStorage": {
+                    "Ref": "RDSMaxStorage"
+                },
+                "MultiAZ": {
+                    "Fn::If": [
+                        "IsMultiAZValid",
+                        {
+                            "Ref": "RDSMultiAZ"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "OptionGroupName": {
+                    "Ref": "RDSOG"
+                },
+                "PubliclyAccessible": false,
+                "Port": {
+                    "Fn::If": [
+                        "HasPort",
+                        {
+                            "Ref": "RDSPort"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "PreferredBackupWindow": {
+                    "Fn::If": [
+                        "HasPreferredBackupWindow",
+                        {
+                            "Ref": "RDSPreferredBackupWindow"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "PreferredMaintenanceWindow": {
+                    "Fn::If": [
+                        "HasPreferredMaintenanceWindow",
+                        {
+                            "Ref": "RDSPreferredMaintenanceWindow"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "StorageEncrypted": {
+                    "Ref": "RDSStorageEncrypted"
+                },
+                "StorageType": {
+                    "Ref": "RDSStorageType"
+                },
+                "Timezone": {
+                    "Fn::If": [
+                        "HasTimezone",
+                        {
+                            "Ref": "RDSTimezone"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "VPCSecurityGroups": {
+                    "Fn::If": [
+                        "HasSecurityGroups",
+                        {
+                            "Fn::Split": [
+                                ",",
+                                {
+                                    "Fn::Join": [
+                                        ",",
+                                        [
+                                            {
+                                                "Fn::Sub": "{{resolve:ssm:/ams/${VpcId}/SentinelDefaultSecurityGroupPrivateOnly:1}}"
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    ",",
+                                                    {
+                                                        "Ref": "SecurityGroups"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        [
+                            {
+                                "Fn::Sub": "{{resolve:ssm:/ams/${VpcId}/SentinelDefaultSecurityGroupPrivateOnly:1}}"
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "ams:change-type",
+                        "Value": {
+                            "Fn::Sub": [
+                                "id=${ChangeTypeId}:version=${ChangeTypeVersion}",
+                                {
+                                    "ChangeTypeId": {
+                                        "Fn::FindInMap": [
+                                            "AmsChangeManagement",
+                                            "ChangeType",
+                                            "Id"
+                                        ]
+                                    },
+                                    "ChangeTypeVersion": {
+                                        "Fn::FindInMap": [
+                                            "AmsChangeManagement",
+                                            "ChangeType",
+                                            "Version"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "sat-rds-bifeatures"
+                    },
+                    {
+                        "Key": "AppId",
+                        "Value": "SATAudit"
+                    },
+                    {
+                        "Key": "AppName",
+                        "Value": "SATAudit"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "false"
+                    },
+                    {
+                        "Key": "Budget",
+                        "Value": "0"
+                    },
+                    {
+                        "Key": "BudgetCentre",
+                        "Value": "10065210"
+                    },
+                    {
+                        "Key": "DataClassification",
+                        "Value": "confidential"
+                    },
+                    {
+                        "Key": "Department",
+                        "Value": "GF"
+                    },
+                    {
+                        "Key": "EnvironmentType",
+                        "Value": "DEV"
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": "Hannelie Lotz"
+                    },
+                    {
+                        "Key": "OwnerTeam",
+                        "Value": "FinancialReportingProgramme"
+                    },
+                    {
+                        "Key": "OwnerTeamEmail",
+                        "Value": "FinancialReportingProgrammeDevelopers@oldmutual.com"
+                    },
+                    {
+                        "Key": "Patch Group",
+                        "Value": "DEV"
+                    },
+                    {
+                        "Key": "PatchOrder",
+                        "Value": "1"
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": "SAt Audit"
+                    },
+                    {
+                        "Key": "Role",
+                        "Value": "Database Server"
+                    },
+                    {
+                        "Key": "Tier",
+                        "Value": "Data"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": "1"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "428196a0-0488-4274-a4ba-867fe63eb600"
+                }
+            }
+        },
+        "RDSOG": {
+            "Type": "AWS::RDS::OptionGroup",
+            "Properties": {
+                "EngineName": "sqlserver-ee",
+                "MajorEngineVersion": "15.00",
+                "OptionGroupDescription": "BI Features",
+                "OptionConfigurations": [
+                    {
+                        "OptionName": "SSAS",
+                        "Port": 2383,
+                        "VpcSecurityGroupMemberships": [
+                            "sg-0f44189f0706a068d"
+                        ],
+                        "OptionSettings": [
+                            {
+                                "Name": "MAX_MEMORY",
+                                "Value": "60"
+                            }
+                        ]
+                    },
+                    {
+                        "OptionName": "SSRS",
+                        "Port": 11433,
+                        "VpcSecurityGroupMemberships": [
+                            "sg-0f44189f0706a068d"
+                        ],
+                        "OptionSettings": [
+                            {
+                                "Name": "MAX_MEMORY",
+                                "Value": "10"
+                            }
+                        ]
+                    },
+                    {
+                        "OptionName": "SSIS"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "ams:change-type",
+                        "Value": {
+                            "Fn::Sub": [
+                                "id=${ChangeTypeId}:version=${ChangeTypeVersion}",
+                                {
+                                    "ChangeTypeId": {
+                                        "Fn::FindInMap": [
+                                            "AmsChangeManagement",
+                                            "ChangeType",
+                                            "Id"
+                                        ]
+                                    },
+                                    "ChangeTypeVersion": {
+                                        "Fn::FindInMap": [
+                                            "AmsChangeManagement",
+                                            "ChangeType",
+                                            "Version"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "sat-rds-bifeatures"
+                    },
+                    {
+                        "Key": "AppId",
+                        "Value": "SATAudit"
+                    },
+                    {
+                        "Key": "AppName",
+                        "Value": "SATAudit"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "false"
+                    },
+                    {
+                        "Key": "Budget",
+                        "Value": "0"
+                    },
+                    {
+                        "Key": "BudgetCentre",
+                        "Value": "10065210"
+                    },
+                    {
+                        "Key": "DataClassification",
+                        "Value": "confidential"
+                    },
+                    {
+                        "Key": "Department",
+                        "Value": "GF"
+                    },
+                    {
+                        "Key": "EnvironmentType",
+                        "Value": "DEV"
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": "Hannelie Lotz"
+                    },
+                    {
+                        "Key": "OwnerTeam",
+                        "Value": "FinancialReportingProgramme"
+                    },
+                    {
+                        "Key": "OwnerTeamEmail",
+                        "Value": "FinancialReportingProgrammeDevelopers@oldmutual.com"
+                    },
+                    {
+                        "Key": "Patch Group",
+                        "Value": "DEV"
+                    },
+                    {
+                        "Key": "PatchOrder",
+                        "Value": "1"
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": "SAt Audit"
+                    },
+                    {
+                        "Key": "Role",
+                        "Value": "Database Server"
+                    },
+                    {
+                        "Key": "Tier",
+                        "Value": "Data"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": "1"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "94d34ab6-32b0-4a3a-a71d-8c4b47482a25"
+                }
+            }
+        },
+        "RDSDBP": {
+            "Type": "AWS::RDS::DBParameterGroup",
+            "Properties": {
+                "Description": "ssis-sqlserver-ee-15",
+                "Family": "sqlserver-ee-15.0",
+                "Parameters": {
+                    "clr enabled": 1
+                },
+                "Tags": [
+                    {
+                        "Key": "ams:change-type",
+                        "Value": {
+                            "Fn::Sub": [
+                                "id=${ChangeTypeId}:version=${ChangeTypeVersion}",
+                                {
+                                    "ChangeTypeId": {
+                                        "Fn::FindInMap": [
+                                            "AmsChangeManagement",
+                                            "ChangeType",
+                                            "Id"
+                                        ]
+                                    },
+                                    "ChangeTypeVersion": {
+                                        "Fn::FindInMap": [
+                                            "AmsChangeManagement",
+                                            "ChangeType",
+                                            "Version"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "sat-rds-bifeatures"
+                    },
+                    {
+                        "Key": "AppId",
+                        "Value": "SATAudit"
+                    },
+                    {
+                        "Key": "AppName",
+                        "Value": "SATAudit"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "false"
+                    },
+                    {
+                        "Key": "Budget",
+                        "Value": "0"
+                    },
+                    {
+                        "Key": "BudgetCentre",
+                        "Value": "10065210"
+                    },
+                    {
+                        "Key": "DataClassification",
+                        "Value": "confidential"
+                    },
+                    {
+                        "Key": "Department",
+                        "Value": "GF"
+                    },
+                    {
+                        "Key": "EnvironmentType",
+                        "Value": "DEV"
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": "Hannelie Lotz"
+                    },
+                    {
+                        "Key": "OwnerTeam",
+                        "Value": "FinancialReportingProgramme"
+                    },
+                    {
+                        "Key": "OwnerTeamEmail",
+                        "Value": "FinancialReportingProgrammeDevelopers@oldmutual.com"
+                    },
+                    {
+                        "Key": "Patch Group",
+                        "Value": "DEV"
+                    },
+                    {
+                        "Key": "PatchOrder",
+                        "Value": "1"
+                    },
+                    {
+                        "Key": "ProjectName",
+                        "Value": "SAt Audit"
+                    },
+                    {
+                        "Key": "Role",
+                        "Value": "Database Server"
+                    },
+                    {
+                        "Key": "Tier",
+                        "Value": "Data"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": "1"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "57f66c7d-68d8-4aa4-b74f-74fda8f8683d"
+                }
+            }
+        },
+        "CPUUtilizationAlarmRDSInstance": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "AlarmDescription": "RDS CPU Utilization Alarm",
+                "AlarmName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "RDSInstance"
+                            },
+                            "CPUUtilization"
+                        ]
+                    ]
+                },
+                "ComparisonOperator": "GreaterThanThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "DBInstanceIdentifier",
+                        "Value": {
+                            "Ref": "RDSInstance"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "2",
+                "InsufficientDataActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "MetricName": "CPUUtilization",
+                "Namespace": "AWS/RDS",
+                "OKActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "Period": "900",
+                "Statistic": "Average",
+                "Threshold": "75",
+                "Unit": "Percent"
+            }
+        },
+        "DiskQueueDepthAlarmRDSInstance": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "AlarmDescription": "RDS Disk Queue Depth Alarm",
+                "AlarmName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "RDSInstance"
+                            },
+                            "DiskQueue"
+                        ]
+                    ]
+                },
+                "ComparisonOperator": "GreaterThanThreshold",
+                "InsufficientDataActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "DBInstanceIdentifier",
+                        "Value": {
+                            "Ref": "RDSInstance"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "15",
+                "MetricName": "DiskQueueDepth",
+                "Namespace": "AWS/RDS",
+                "OKActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "Period": "60",
+                "Statistic": "Sum",
+                "Threshold": "75",
+                "Unit": "Count"
+            }
+        },
+        "FreeStorageSpaceAlarmRDSInstance": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "AlarmDescription": "RDS Free Storage Space Alarm",
+                "AlarmName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "RDSInstance"
+                            },
+                            "FreeStorageSpace"
+                        ]
+                    ]
+                },
+                "ComparisonOperator": "LessThanThreshold",
+                "InsufficientDataActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "DBInstanceIdentifier",
+                        "Value": {
+                            "Ref": "RDSInstance"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "2",
+                "MetricName": "FreeStorageSpace",
+                "Namespace": "AWS/RDS",
+                "OKActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "Period": "300",
+                "Statistic": "Average",
+                "Threshold": "1073741824",
+                "Unit": "Bytes"
+            }
+        },
+        "ReadLatencyAlarmRDSInstance": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "AlarmDescription": "RDS Read Latency Alarm",
+                "AlarmName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "RDSInstance"
+                            },
+                            "ReadLatency"
+                        ]
+                    ]
+                },
+                "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "DBInstanceIdentifier",
+                        "Value": {
+                            "Ref": "RDSInstance"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "2",
+                "InsufficientDataActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "MetricName": "ReadLatency",
+                "Namespace": "AWS/RDS",
+                "OKActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "Period": "300",
+                "Statistic": "Average",
+                "Threshold": "1.001",
+                "Unit": "Seconds"
+            }
+        },
+        "WriteLatencyAlarmRDSInstance": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "AlarmDescription": "RDS Write Latency Alarm",
+                "AlarmName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "RDSInstance"
+                            },
+                            "WriteLatency"
+                        ]
+                    ]
+                },
+                "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "DBInstanceIdentifier",
+                        "Value": {
+                            "Ref": "RDSInstance"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "2",
+                "InsufficientDataActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "MetricName": "WriteLatency",
+                "Namespace": "AWS/RDS",
+                "OKActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "Period": "300",
+                "Statistic": "Average",
+                "Threshold": "1.005",
+                "Unit": "Seconds"
+            }
+        },
+        "SwapUsageAlarmRDSInstance": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "AlarmDescription": "RDS Swap Usage Alarm",
+                "AlarmName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "RDSInstance"
+                            },
+                            "SwapUsage"
+                        ]
+                    ]
+                },
+                "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "DBInstanceIdentifier",
+                        "Value": {
+                            "Ref": "RDSInstance"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "2",
+                "InsufficientDataActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "MetricName": "SwapUsage",
+                "Namespace": "AWS/RDS",
+                "OKActions": [
+                    {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn:aws:sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AWS::AccountId"
+                                },
+                                "MMS-Topic"
+                            ]
+                        ]
+                    }
+                ],
+                "Period": "300",
+                "Statistic": "Average",
+                "Threshold": "104857600",
+                "Unit": "Bytes"
+            }
+        }
+    },
+    "Conditions": {
+        "HasCustomEncryptionKey": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSStorageEncryptionKey"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "HasIOPS": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSIOPS"
+                        },
+                        "0"
+                    ]
+                }
+            ]
+        },
+        "HasPort": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSPort"
+                        },
+                        "0"
+                    ]
+                }
+            ]
+        },
+        "HasPreferredMaintenanceWindow": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSPreferredMaintenanceWindow"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "HasPreferredBackupWindow": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSPreferredBackupWindow"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "HasDBInstanceIdentifier": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBInstanceIdentifier"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "HasDBParameterGroupName": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBParameterGroupName"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "HasOptionGroupName": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSOptionGroupName"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "HasSecurityGroups": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Fn::Select": [
+                                "0",
+                                {
+                                    "Ref": "SecurityGroups"
+                                }
+                            ]
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "IsMSSQL": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "sqlserver-ee"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "sqlserver-se"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "sqlserver-ex"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "sqlserver-web"
+                    ]
+                }
+            ]
+        },
+        "HasDomain": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "RDSDomain"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Condition": "IsMSSQL"
+                }
+            ]
+        },
+        "HasTimezone": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "RDSTimezone"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Condition": "IsMSSQL"
+                }
+            ]
+        },
+        "IsMultiAZValid": {
+            "Fn::Not": [
+                {
+                    "Fn::Or": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "RDSDBEngine"
+                                },
+                                "sqlserver-ex"
+                            ]
+                        },
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "RDSDBEngine"
+                                },
+                                "sqlserver-web"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "IsOracle": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "oracle-se2"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "oracle-se1"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "oracle-se"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "oracle-ee"
+                    ]
+                }
+            ]
+        },
+        "IsOracleSe1OrSe2": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "oracle-se2"
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "RDSDBEngine"
+                        },
+                        "oracle-se1"
+                    ]
+                }
+            ]
+        },
+        "HasCharacterSetName": {
+            "Fn::And": [
+                {
+                    "Condition": "IsOracle"
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "RDSCharacterSetName"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

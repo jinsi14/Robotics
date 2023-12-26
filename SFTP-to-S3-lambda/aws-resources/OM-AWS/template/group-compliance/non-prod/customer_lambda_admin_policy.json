@@ -1,0 +1,125 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Resource": [
+        "arn:aws:lambda:*:*:function:*",
+        "arn:aws:lambda:*:*:layer:*"
+      ],
+      "Effect": "Allow",
+      "NotAction": "lambda:AddPermission",
+      "Sid": "AllowLambdaActions"
+    },
+    {
+      "Action": [
+        "lambda:GetAccountSettings",
+        "lambda:GetEventSourceMapping",
+        "lambda:ListEventSourceMappings",
+        "lambda:ListFunctions",
+        "iam:ListRoles",
+        "lambda:ListTags"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "AllowLambdaReadPermissions"
+    },
+    {
+      "Condition": {
+        "StringEquals": {
+          "lambda:Principal": [
+            "apigateway.amazonaws.com",
+            "codecommit.amazonaws.com",
+            "events.amazonaws.com",
+            "sns.amazonaws.com",
+            "s3.amazonaws.com",
+            "secretsmanager.amazonaws.com"
+          ]
+        }
+      },
+      "Action": [
+        "lambda:AddPermission",
+        "lambda:RemovePermission"
+      ],
+      "Resource": "arn:aws:lambda:*:*:function:*",
+      "Effect": "Allow",
+      "Sid": "AllowManageFunctionPolicy"
+    },
+    {
+      "Action": [
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:GetRole",
+        "iam:PassRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::*:role/customer_lambda_basic_execution_role",
+        "arn:aws:iam::332760374405:role/customer_om_cs-ai-groupcompliance-nonprod-lambda-execution-role"
+      ],
+      "Effect": "Allow",
+      "Sid": "AllowPassExecutionRole"
+    },
+    {
+      "Action": [
+        "logs:Describe*",
+        "logs:Get*",
+        "logs:FilterLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda/*",
+      "Effect": "Allow",
+      "Sid": "AllowViewFunctionCWLogs"
+    },
+    {
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda-insights:*",
+      "Effect": "Allow",
+      "Sid": "AllowViewFunctionCWLogsInsights"
+    },
+    {
+      "Action": [
+        "lambda:*"
+      ],
+      "Resource": [
+        "arn:aws:lambda:*:*:function:AMS*",
+        "arn:aws:lambda:*:*:layer:AMS*"
+      ],
+      "Effect": "Deny",
+      "Sid": "DenyAMSFunctions"
+    },
+    {
+      "Action": [
+        "lambda:DeleteEventSourceMapping",
+        "lambda:UpdateEventSourceMapping",
+        "lambda:CreateEventSourceMapping"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Sid": "AllowFunctionEventSourceMappings"
+    },
+    {
+      "Condition": {
+        "StringLike": {
+          "lambda:FunctionArn": "arn:aws:lambda:*:*:function:AMS*"
+        }
+      },
+      "Action": [
+        "lambda:DeleteEventSourceMapping",
+        "lambda:UpdateEventSourceMapping",
+        "lambda:CreateEventSourceMapping"
+      ],
+      "Resource": "*",
+      "Effect": "Deny",
+      "Sid": "DenyAMSFunctionEventSourceMappings"
+    },
+    {
+      "Action": [
+        "logs:*"
+      ],
+      "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda/AMS*",
+      "Effect": "Deny",
+      "Sid": "DenyAMSFunctionCWLogs"
+    }
+  ]
+}

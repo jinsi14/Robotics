@@ -1,0 +1,26 @@
+{
+    "UseCase": "Create a policy for email(SNS) send allowing publish a message to topic and attached it in to lambda role.",
+    "IAM Policy": [
+        {
+            "PolicyName": "customer_om_group_compliance_lambda_sns_policy",
+            "PolicyDocument": "{
+				"Version": "2012-10-17",
+				"Statement": [
+					{
+						"Action": [
+							"sns:Publish"
+						],
+						"Resource": "arn:aws:sns:eu-west-1:342478014409:OML-Group-Complience-Dataload",
+						"Effect": "Allow",
+						"Sid": "customerLambdaSNS"
+					}
+				]
+			}",
+            "RelatedResources": [
+                "customer_om_groupcompliance-nonprod-lambda-execution-role"
+            ]
+        }
+    ],
+    "Operation": "Create",
+    "Priority": "Low"
+}

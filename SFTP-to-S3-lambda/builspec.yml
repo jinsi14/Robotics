@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  build:
+    commands:
+      - echo "Compiling Java code..."
+      - javac -cp ".:lib/*" -d SFTP-to-S3-lambda src/main/java/**/*.java
+      - echo "Packaging JAR file..."
+      - cd target
+      - jar cf ../S3FilePutTriggerLambda.jar .
+  post_build:
+    commands:
+      - echo "Uploading JAR to S3..."
+      - aws s3 cp S3FilePutTriggerLambda.jar s3://codepipeline-ap-south-1-538590669851/S3FilePutTriggerLambda.jar
+      - echo "Build completed successfully!"

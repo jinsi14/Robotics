@@ -1,0 +1,154 @@
+1)
+Modelset Lambda: Please create placeholder lambda execution roles for future lambda functions
+
+{
+    "UseCase": "Modelset Lambda: Please create a placeholder lambda execution role for a future lambda function",
+    "IAM Role": [
+        {
+            "RoleName": "omwealth-dmp-lambda-data-modelset-execution-role",
+            "TrustPolicy": "{\n  \"Version\": \"2008-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Principal\": {\n        \"Service\": \"lambda.amazonaws.com\"\n      },\n      \"Action\": \"sts:AssumeRole\"\n    }\n  ]\n}",
+            "RolePermissions": "AWSXrayWriteOnlyAccess\nAWSLambdaBasicExecutionRole\ncustomer_lambda_vpcaccess_policy"
+        }
+    ],
+    "Operation": "Create"
+}
+
+
+customer_om_{acc_name_construct}_{function}_exec_role
+customer_om_cs-ai-groupcompliance-nonprod-lambda-execution-role
+
+----TRUST Policy
+{
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Effect":"Allow",
+         "Principal":{
+            "Service":"lambda.amazonaws.com"
+         },
+         "Action":"sts:AssumeRole"
+      }
+   ]
+}
+
+---Secret Manager Policy
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetResourcePolicy",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:ListSecretVersionIds"
+      ],
+      "Resource": "arn:aws:secretsmanager:eu-west-1:332760374405:secret:oml-cs-ai-non-prod-compliance-secrets-xQTaA9"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "secretsmanager:ListSecrets",
+      "Resource": "*"
+    }
+  ]
+}
+
+---S3 Full Access to Group Compliance Bucket.
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*",
+        "s3-object-lambda:*"
+      ],
+      "Resource": "arn:aws:s3:::oml-cs-ai-non-prod-compliance"
+    }
+  ]
+}
+
+--iam Policy Allow Read/Write access to Group Compliance Bucket.
+{
+  "Id":"iam-policy-s3-allow-gdm-list-put",
+  "Version":"2012-10-17",
+  "Statement":[
+    {
+      "Sid":"GDMFolderAccessStatement",
+      "Action":[
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:PutObject"
+      ],
+      "Effect":"Allow",
+      "Resource":[
+        "arn:aws:s3:::oml-cs-ai-non-prod-compliance-p/gdm-archive/",
+        "arn:aws:s3:::oml-cs-ai-non-prod-compliance-p/gdm-extract/"
+      ]
+    }
+  ]
+}
+
+--IAMPolicyS3ReadWriteGDMFolder
+--iam-policy-s3-read-write-GDM-folder
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketTagging",
+        "s3:GetObjectVersionTagging",
+        "s3:GetObjectAttributes",
+        "s3:ListBucket",
+        "s3:GetBucketAcl",
+        "s3:GetObjectVersionAttributes",
+        "s3:GetBucketPolicy",
+        "s3:PutObject",
+        "s3:GetObjectAcl",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:GetBucketLocation",
+        "s3:GetObjectVersion",
+        "s3:ListAllMyBuckets"
+      ],
+      "Resource": [
+        "arn:aws:s3:::oml-cs-ai-non-prod-compliance-p",
+        "arn:aws:s3:::oml-cs-ai-non-prod-compliance-p/gdm-extract",
+        "arn:aws:s3:::oml-cs-ai-non-prod-compliance-p/gdm-archive"
+      ]
+    }
+  ]
+}
+
+---S3 GDM Bucket policy
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3GDMBucketAccessPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "s3:DeleteObject",
+        "s3:GetBucketTagging",
+        "s3:GetObjectVersionTagging",
+        "s3:GetObjectAttributes",
+        "s3:GetBucketAcl",
+        "s3:GetObjectVersionAttributes",
+        "s3:GetBucketPolicy",
+        "s3:GetObjectAcl",
+        "s3:GetObject",
+        "s3:GetBucketLocation",
+        "s3:GetObjectVersion",
+        "s3:ListAllMyBuckets",
+        "s3:ListBucket",
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::oml-cs-ai-non-prod-compliance/*"
+      ]
+    }
+  ]
+}
