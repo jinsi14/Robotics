@@ -3,11 +3,13 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      java: corretto21
+      java: corretto11
   build:
     commands:
       - echo "Compiling Java code..."
-      - javac -cp ".:lib/*" -d SFTP-to-S3-lambda src/main/java/**/*.java
+      - cd SFTP-to-S3-lambda
+      - mvn clean
+      - mvn compile
       - echo "Packaging JAR file..."
       - cd target
       - jar cf ../S3FilePutTriggerLambda.jar .
