@@ -10,11 +10,9 @@ phases:
       - cd SFTP-to-S3-lambda
       - mvn clean
       - mvn compile
-      - echo "Packaging JAR file..."
-      - cd target
-      - jar cf ../S3FilePutTriggerLambda.jar .
+      - echo "Build completed successfully!"
   post_build:
     commands:
       - echo "Uploading JAR to S3..."
-      - aws s3 cp S3FilePutTriggerLambda.jar s3://codepipeline-ap-south-1-538590669851/S3FilePutTriggerLambda.jar
-      - echo "Build completed successfully!"
+      - aws s3 cp SFTP-to-S3-lambda/target/S3FilePutTriggerLambda.jar s3://codepipeline-ap-south-1-538590669851/S3FilePutTriggerLambda.jar
+      - echo "Upload completed successfully!"
